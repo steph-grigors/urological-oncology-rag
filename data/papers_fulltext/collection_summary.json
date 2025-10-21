@@ -1,0 +1,12 @@
+{
+  "total_papers": 815,
+  "topics": {
+    "prostate": 250,
+    "bladder": 250,
+    "kidney": 250,
+    "testicular": 65
+  },
+  "collected_at": "2025-10-20T16:15:03.216962",
+  "duration_seconds": 1642.8565866947174,
+  "source": "PubMed Central (PMC)"
+}

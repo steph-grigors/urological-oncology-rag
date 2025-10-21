@@ -1,0 +1,52 @@
+{
+  "topic": "testicular",
+  "papers": 65,
+  "sections": 861,
+  "chunks": 2565,
+  "avg_sections_per_paper": 13.2,
+  "avg_chunks_per_paper": 39.5,
+  "avg_chunk_length": 162.9,
+  "top_sections": [
+    [
+      "Results",
+      345
+    ],
+    [
+      "Discussion",
+      254
+    ],
+    [
+      "Methods",
+      123
+    ],
+    [
+      "Introduction",
+      80
+    ],
+    [
+      "4. Discussion",
+      44
+    ],
+    [
+      "DISCUSSION",
+      42
+    ],
+    [
+      "Background",
+      38
+    ],
+    [
+      "RESULTS",
+      37
+    ],
+    [
+      "3. Results",
+      32
+    ],
+    [
+      "Materials and Methods",
+      30
+    ]
+  ],
+  "processed_at": "2025-10-20T19:12:26.566468"
+}

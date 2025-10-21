@@ -1,0 +1,52 @@
+{
+  "topic": "prostate",
+  "papers": 250,
+  "sections": 3868,
+  "chunks": 13541,
+  "avg_sections_per_paper": 15.5,
+  "avg_chunks_per_paper": 54.2,
+  "avg_chunk_length": 168.6,
+  "top_sections": [
+    [
+      "Results",
+      1341
+    ],
+    [
+      "Discussion",
+      864
+    ],
+    [
+      "Introduction",
+      449
+    ],
+    [
+      "Methods",
+      413
+    ],
+    [
+      "RESULTS",
+      186
+    ],
+    [
+      "Background",
+      175
+    ],
+    [
+      "DISCUSSION",
+      167
+    ],
+    [
+      "1. Introduction",
+      158
+    ],
+    [
+      "Methods and analysis",
+      129
+    ],
+    [
+      "INTRODUCTION",
+      122
+    ]
+  ],
+  "processed_at": "2025-10-20T19:12:24.297237"
+}

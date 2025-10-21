@@ -1,0 +1,14 @@
+{
+  "total_papers": 815,
+  "total_chunks": 41970,
+  "avg_chunks_per_paper": 51.5,
+  "topics": {
+    "prostate": 13541,
+    "bladder": 13152,
+    "kidney": 12712,
+    "testicular": 2565
+  },
+  "chunk_size": 200,
+  "overlap": 30,
+  "processed_at": "2025-10-20T19:12:26.755679"
+}

@@ -1,0 +1,52 @@
+{
+  "topic": "bladder",
+  "papers": 250,
+  "sections": 4205,
+  "chunks": 13152,
+  "avg_sections_per_paper": 16.8,
+  "avg_chunks_per_paper": 52.6,
+  "avg_chunk_length": 164.0,
+  "top_sections": [
+    [
+      "Results",
+      1441
+    ],
+    [
+      "Discussion",
+      876
+    ],
+    [
+      "Introduction",
+      516
+    ],
+    [
+      "Methods",
+      349
+    ],
+    [
+      "Materials and methods",
+      316
+    ],
+    [
+      "RESULTS",
+      289
+    ],
+    [
+      "DISCUSSION",
+      190
+    ],
+    [
+      "4. Discussion",
+      190
+    ],
+    [
+      "1. Introduction",
+      175
+    ],
+    [
+      "MATERIALS AND METHODS",
+      155
+    ]
+  ],
+  "processed_at": "2025-10-20T19:12:25.360073"
+}

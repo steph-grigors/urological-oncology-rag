@@ -1,0 +1,52 @@
+{
+  "topic": "kidney",
+  "papers": 250,
+  "sections": 4182,
+  "chunks": 12712,
+  "avg_sections_per_paper": 16.7,
+  "avg_chunks_per_paper": 50.8,
+  "avg_chunk_length": 163.4,
+  "top_sections": [
+    [
+      "Results",
+      1198
+    ],
+    [
+      "Discussion",
+      891
+    ],
+    [
+      "Introduction",
+      474
+    ],
+    [
+      "RESULTS",
+      283
+    ],
+    [
+      "DISCUSSION",
+      222
+    ],
+    [
+      "Methods",
+      214
+    ],
+    [
+      "Materials and methods",
+      197
+    ],
+    [
+      "4. Discussion",
+      169
+    ],
+    [
+      "1. Introduction",
+      167
+    ],
+    [
+      "3. Results",
+      144
+    ]
+  ],
+  "processed_at": "2025-10-20T19:12:26.334561"
+}
