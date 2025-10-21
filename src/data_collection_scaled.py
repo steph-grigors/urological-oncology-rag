@@ -364,7 +364,7 @@ class FullTextCollector:
 
 def main():
     """Run full-text data collection"""
-    
+
     if not os.getenv("NCBI_API_KEY"):
         print("⚠️  Warning: NCBI_API_KEY not set. Collection will be slower.")
         response = input("\nContinue anyway? (y/n): ").lower()
@@ -376,10 +376,6 @@ def main():
 
     print("\n✅ Full-text collection complete!")
     print(f"📁 Papers saved in: data/papers_fulltext/")
-    print("\n🔄 Next steps:")
-    print("   1. Process papers: python -m src.data_processing_fulltext")
-    print("   2. Generate embeddings")
-    print("   3. Deploy!")
 
 
 if __name__ == "__main__":

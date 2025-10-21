@@ -286,10 +286,6 @@ def main():
 
     print("\n✅ Embeddings generation complete!")
     print(f"📁 ChromaDB saved in: chroma_db_scaled/")
-    print("\n🔄 Next steps:")
-    print("   1. Update RAG system to use new collection")
-    print("   2. Test with queries across all topics")
-    print("   3. Deploy to Hugging Face!")
 
 
 if __name__ == "__main__":

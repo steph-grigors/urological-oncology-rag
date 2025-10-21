@@ -262,8 +262,6 @@ def main():
 
     print("\n✅ Processing complete!")
     print(f"📁 Chunks saved in: data/processed_fulltext/")
-    print("\n🔄 Next step:")
-    print("   Generate embeddings: python -m src.embeddings_scaled")
 
 
 if __name__ == "__main__":
