@@ -25,7 +25,7 @@ Try it now: [Hugging Face Space](https://huggingface.co/spaces/YOUR_USERNAME/uro
 - **Chunks:** 41,970 section-aware searchable segmentrag_u
 - **Coverage:** 2015-2025 (last 10 years)
 - **Average Sections:** 15.5 per paper
-- **Quality Score:** 97.5% (Faithfulness + Relevance + Precision)
+- **Quality Score:** 95.8% (Faithfulness + Relevance + Precision)
 
 ## ✨ Key Features
 
@@ -76,13 +76,13 @@ Try it now: [Hugging Face Space](https://huggingface.co/spaces/YOUR_USERNAME/uro
 ## 📈 Performance Metrics
 
 ### Quality (from evaluation on test set)
-- **Faithfulness:** 100% - Zero hallucination
-- **Relevance:** 100% - Answers always address questions
-- **Context Precision:** 92.5% - Retrieved chunks are relevant
-- **Overall Quality:** 97.5%
+- **Faithfulness:**       95.8%
+- **Relevance:**          100.0%
+- **Context Precision:**  91.7%
+- **Overall Quality:** 95.8%
 
 ### Speed
-- **Average Latency:** 7.3s (first query)
+- **Average Latency:** 5.95s (first query)
 - **Cached Query:** 0.02s (99.9% faster)
 - **Retrieval:** ~0.5s
 - **Generation:** ~6-7s
@@ -216,17 +216,17 @@ If you use this system in research, please cite:
 ```bibtex
 @software{urological_oncology_rag_2025,
   title = {Urological Oncology RAG System},
-  author = {Your Name},
+  author = {Stéphan Grigorescu},
   year = {2025},
   note = {815 papers, 41,970 chunks, PubMed Central Open Access},
-  url = {https://github.com/YOUR_USERNAME/urological-oncology-rag}
+  url = {https://github.com//urological-oncology-rag}
 }
 ```
 
 ## 📧 Contact
-
-- **GitHub:** [@YOUR_USERNAME](https://github.com/YOUR_USERNAME)
-- **Issues:** [Report bugs](https://github.com/YOUR_USERNAME/urological-oncology-rag/issues)
+steph-grigors
+- **GitHub:** [@steph-grigors](https://github.com/steph-grigors)
+- **Issues:** [Report bugs](https://github.com/steph-grigors/urological-oncology-rag/issues)
 
 ## ⚖️ License
 
