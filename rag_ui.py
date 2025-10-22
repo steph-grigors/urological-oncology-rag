@@ -4,6 +4,7 @@ Professional UI - Refactored v2
 """
 
 import streamlit as st
+import os
 import time
 import json
 from pathlib import Path
@@ -151,8 +152,19 @@ if 'show_query_metrics' not in st.session_state:
 
 
 @st.cache_resource
-def load_rag_system():
-    """Load RAG system (cached)"""
+def load_rag_system(_api_key=None):
+    """Load RAG system with optional user API key"""
+
+    # Use user key if provided, otherwise use environment variable
+    api_key = _api_key or os.getenv("OPENAI_API_KEY")
+
+    if not api_key:
+        st.error("❌ No API key available. Please enter your OpenAI API key in the sidebar.")
+        st.stop()
+
+    # Set the API key for this session
+    os.environ["OPENAI_API_KEY"] = api_key
+
     with st.spinner("🚀 Initializing RAG System..."):
         retriever = OptimizedRAGRetriever(
             chroma_db_dir="chroma_db_scaled",
@@ -183,6 +195,26 @@ def load_evaluation_metrics():
 def display_sidebar():
     """Minimalist sidebar with live session stats"""
     with st.sidebar:
+        st.markdown("### 🔑 API Configuration")
+
+        # API Key input
+        user_api_key = st.text_input(
+            "OpenAI API Key",
+            type="password",
+            placeholder="sk-...",
+            help="Enter your key for unlimited usage. Leave empty for 1 free query."
+        )
+
+        # Store in session state
+        if user_api_key:
+            st.session_state.user_api_key = user_api_key
+            st.success("✅ Your key active")
+        else:
+            st.session_state.user_api_key = None
+            st.warning("⚠️ Using demo mode (1 query)")
+
+        st.divider()
+
         st.markdown("### 🔬 System Information")
 
         # Live session metrics
@@ -207,44 +239,7 @@ def display_sidebar():
 ```
             """)
         else:
-            st.info("No queries yet in this session")
-
-        st.divider()
-
-        # Conversation controls
-        st.markdown("#### 💬 Conversation")
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            if st.button("🔄 Reset Chat", use_container_width=True, key="sidebar_reset"):
-                memory = st.session_state.conversation_memory
-                st.session_state.conversation = memory.create_conversation()
-                st.session_state.current_response = None
-                st.session_state.quality_metrics = None
-                st.success("Chat reset!")
-                st.rerun()
-
-        with col2:
-            context_mode = st.checkbox(
-                "Enable conversation mode",
-                value=st.session_state.conversation is not None,
-                help="Remember previous questions for follow-ups",
-                key="sidebar_context"
-            )
-
-        if context_mode and st.session_state.conversation is None:
-            memory = st.session_state.conversation_memory
-            st.session_state.conversation = memory.create_conversation()
-        elif not context_mode:
-            st.session_state.conversation = None
-
-        # Show conversation status
-        if st.session_state.conversation:
-            turns = len(st.session_state.conversation.messages) // 2
-            st.caption(f"💬 Active: {turns} turns")
-        else:
-            st.caption("💬 Single-turn mode")
+            st.info("No queries yet")
 
         st.divider()
 
@@ -471,29 +466,54 @@ def main():
     # Tab 1: Query Interface
     with tab1:
         # Load RAG system
-        retriever = load_rag_system()
+        user_key = st.session_state.get('user_api_key')
+        retriever = load_rag_system(_api_key=user_key)
         retriever.config.top_k = top_k
 
-        # 1. KNOWLEDGE BASE (First)
+       # 1. KNOWLEDGE BASE (First)
         st.markdown("### 📚 Knowledge Base")
 
-        # Topic selector (hybrid approach)
-        col1, col2, col3 = st.columns([3, 1, 1])
+        # Topic selector
+        topic_filter = st.selectbox(
+            "Search in:",
+            ["All Topics", "Prostate Cancer", "Bladder Cancer", "Kidney Cancer", "Testicular Cancer"],
+            index=0,
+            help="Filter by cancer type (auto-detects by default)"
+        )
+
+        # Add vertical spacing
+        st.markdown("<div style='margin: 20px 0;'></div>", unsafe_allow_html=True)
+
+        # Conversation controls in row
+        col1, col2 = st.columns([1, 1])
+
         with col1:
-            topic_filter = st.selectbox(
-                "Search in:",
-                ["All Topics", "Prostate Cancer", "Bladder Cancer", "Kidney Cancer", "Testicular Cancer"],
-                index=0,
-                help="Auto-detects relevant topics by default"
-            )
+            if st.button("🔄 Reset Current Chat", use_container_width=True):
+                memory = st.session_state.conversation_memory
+                st.session_state.conversation = memory.create_conversation()
+                st.session_state.current_response = None
+                st.session_state.quality_metrics = None
+                st.rerun()
 
         with col2:
-            st.metric("Papers", "815")
+            context_mode = st.checkbox(
+                "💬 Enable Chat Mode",
+                value=st.session_state.conversation is not None,
+                help="Multi-turn conversation with context"
+            )
 
-        with col3:
-            st.metric("Chunks", "41,970")
+        if context_mode and st.session_state.conversation is None:
+            memory = st.session_state.conversation_memory
+            st.session_state.conversation = memory.create_conversation()
+        elif not context_mode:
+            st.session_state.conversation = None
 
-        st.caption("📅 Coverage: 2015-2025 | 🏥 Domain: Urological Oncology (4 Cancer Types)")
+        # Show conversation status inline
+        if st.session_state.conversation:
+            turns = len(st.session_state.conversation.messages) // 2
+            st.caption(f"💬 Active chat • {turns} turns")
+        else:
+            pass
 
         st.divider()
 
