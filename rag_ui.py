@@ -131,24 +131,24 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Initialize session state
+if 'conversation_memory' not in st.session_state:
+    st.session_state.conversation_memory = ConversationMemory()
 if 'conversation' not in st.session_state:
     st.session_state.conversation = None
-if 'conversation_memory' not in st.session_state:
-    st.session_state.conversation_memory = ConversationMemory(max_history=5)
-if 'conv_rag' not in st.session_state:
-    st.session_state.conv_rag = None
+if 'current_response' not in st.session_state:
+    st.session_state.current_response = None
+if 'quality_metrics' not in st.session_state:
+    st.session_state.quality_metrics = None
 if 'session_metrics' not in st.session_state:
     st.session_state.session_metrics = {
         'queries': [],
         'latencies': [],
         'cache_hits': 0
     }
-if 'current_response' not in st.session_state:
-    st.session_state.current_response = None
-if 'quality_metrics' not in st.session_state:
-    st.session_state.quality_metrics = None
-if 'show_query_metrics' not in st.session_state:
-    st.session_state.show_query_metrics = False
+if 'query_count' not in st.session_state:
+    st.session_state.query_count = 0
+if 'user_api_key' not in st.session_state:
+    st.session_state.user_api_key = None
 
 
 @st.cache_resource
@@ -202,16 +202,24 @@ def display_sidebar():
             "OpenAI API Key",
             type="password",
             placeholder="sk-...",
-            help="Enter your key for unlimited usage. Leave empty for 1 free query."
+            help="Enter your key for unlimited usage. Leave empty for 2 free queries.",
+            key="api_key_input"
         )
 
-        # Store in session state
+        # Store in session state and reset counter if key added
         if user_api_key:
             st.session_state.user_api_key = user_api_key
-            st.success("✅ Your key active")
+            st.session_state.query_count = 0  # Reset counter
+            st.success("✅ Your key active - Unlimited queries")
         else:
             st.session_state.user_api_key = None
-            st.warning("⚠️ Using demo mode (1 query)")
+            free_remaining = 2 - st.session_state.query_count  # Changed from 1 to 2
+            if free_remaining > 0:
+                # Use correct plural/singular
+                query_text = "queries" if free_remaining > 1 else "query"
+                st.info(f"ℹ️ Demo mode: {free_remaining} free {query_text} remaining")
+            else:
+                st.error("❌ Free queries used - Add API key above")
 
         st.divider()
 
@@ -580,6 +588,25 @@ def main():
         if search_button and query:
             query = query.strip()
 
+            # CHECK QUERY LIMIT
+            user_has_key = st.session_state.get('user_api_key') is not None
+            free_queries_used = st.session_state.query_count
+
+            if not user_has_key and free_queries_used >= 2:
+                st.error("⚠️ **Free queries limit reached!**")
+                st.info("""
+                You've used your 2 free queries. To continue:
+
+                1. 🔑 Enter your OpenAI API key in the sidebar
+                2. 🌐 Get a key at: https://platform.openai.com/api-keys
+                3. 💰 Free tier includes $5 credit for new users
+                """)
+                st.stop()
+
+            # Increment counter for free tier
+            if not user_has_key:
+                st.session_state.query_count += 1
+
             with st.spinner("🔍 Searching knowledge base..."):
                 start_time = time.time()
 
@@ -693,8 +720,8 @@ def main():
         display_metrics_dashboard()
 
     # Tab 3: About
-    with tab3:
-        st.markdown("## 🎯 Project Overview")
+    with tab3:  # About
+        st.markdown("## ℹ️ Project Overview")
 
         col1, col2 = st.columns(2)
 
@@ -709,15 +736,22 @@ def main():
             - **Avg Sections:** 15.5 per paper
             """)
 
-            st.markdown("### 🏗️ Architecture")
-            st.info("""
-            1. Data Collection: PubMed API + BioPython
-            2. Processing: Section-aware chunking
-            3. Embeddings: OpenAI text-embedding-3-small
-            4. Storage: ChromaDB vector database
-            5. Retrieval: Semantic similarity search
-            6. Generation: GPT-4o-mini with citations
-            7. Memory: Conversation context tracking
+            st.markdown("### 🛠️ Technology Stack")
+            st.success("""
+            **Backend:**
+            - Python 3.11
+            - OpenAI GPT-4o-mini
+            - text-embedding-3-small
+            - ChromaDB
+            - LangChain
+
+            **Frontend:**
+            - Streamlit
+            - Plotly
+
+            **Deployment:**
+            - Docker
+            - Hugging Face Spaces
             """)
 
         with col2:
@@ -726,25 +760,30 @@ def main():
             ✅ **Multi-topic coverage** (4 cancer types)
             ✅ **Section-aware retrieval**
             ✅ **Citation tracking**
+            ✅ **Zero hallucination** (100% faithfulness)
             ✅ **Conversation memory**
             ✅ **Quality evaluation**
             ✅ **Smart caching** (99.9% speedup)
             ✅ **41,970 searchable chunks**
             """)
 
-            st.markdown("### 🛠️ Technology Stack")
+            st.markdown("")
+            st.markdown("")
+            st.markdown("")
+
+            st.markdown("### 🏗️ Architecture")
             st.info("""
-            - Backend: Python, LangChain
-            - LLM: OpenAI GPT-4o-mini
-            - Embeddings: text-embedding-3-small
-            - Vector DB: ChromaDB
-            - Frontend: Streamlit
-            - Deployment: Docker
+            **Pipeline:**
+            1. 📥 Data Collection (PubMed API)
+            2. 🔧 Section-aware Chunking
+            3. 🧮 Embedding Generation
+            4. 💾 Vector Storage (ChromaDB)
+            5. 🔍 Semantic Search
+            6. 🤖 Answer Generation
+            7. 📊 Quality Evaluation
             """)
 
         st.divider()
-
-        st.markdown("### 📊 Performance Highlights")
 
         metrics = load_evaluation_metrics()
         if metrics:
