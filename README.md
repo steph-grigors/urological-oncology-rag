@@ -1,22 +1,10 @@
----
-title: Urological Oncology RAG System
-emoji: 🔬
-colorFrom: blue
-colorTo: green
-sdk: streamlit
-sdk_version: 1.31.0
-app_file: rag_ui.py
-pinned: false
-license: mit
----
-
 # 🔬 Urological Oncology RAG System
 
 A production-grade Retrieval-Augmented Generation (RAG) system providing evidence-based answers about urological oncology.
 
 ## 🎯 Live Demo
 
-Try it now: [Hugging Face Space](https://huggingface.co/spaces/YOUR_USERNAME/urological-oncology-rag)
+Try it now: [Hugging Face Space](https://huggingface.co/spaces/steph-grigors/urological-oncology-rag)
 
 ## 📊 System Overview
 
@@ -159,7 +147,7 @@ Try it now: [Hugging Face Space](https://huggingface.co/spaces/YOUR_USERNAME/uro
 ### Quick Start
 ```bash
 # Clone repository
-git clone https://github.com/YOUR_USERNAME/urological-oncology-rag.git
+git clone https://github.com/steph-grigors/urological-oncology-rag.git
 cd urological-oncology-rag
 
 # Install dependencies
