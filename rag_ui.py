@@ -183,7 +183,7 @@ def load_rag_system(_api_key=None):
 def load_evaluation_metrics():
     """Load evaluation metrics if available"""
     try:
-        metrics_path = Path("data/evaluation/aggregate_metrics.json")
+        metrics_path = Path("data/evaluation/scaled_system_metrics.json")
         if metrics_path.exists():
             with open(metrics_path, 'r') as f:
                 return json.load(f)
@@ -383,80 +383,89 @@ def create_metrics_gauge(value, title):
 
 
 def display_metrics_dashboard():
-    """Display evaluation metrics dashboard"""
+    """Display system-wide evaluation metrics from batch testing"""
+    st.markdown("## 📊 System Performance")
+    st.caption("Based on 12 test queries across 4 cancer types")
 
-    # Check if we should show query-specific metrics
-    if st.session_state.get('show_query_metrics') and st.session_state.quality_metrics:
-        st.markdown("## 📊 Current Query Metrics")
+    metrics = load_evaluation_metrics()
 
-        m = st.session_state.quality_metrics
+    if not metrics:
+        st.warning("⚠️ No evaluation metrics found. Run: `python -m src.evaluate_scaled_system`")
+        return
 
-        # Display 4 gauges with tooltips
-        col1, col2, col3, col4 = st.columns(4)
+    # Display gauges
+    col1, col2, col3, col4 = st.columns(4)
 
-        with col1:
-            fig1 = create_metrics_gauge(m['faithfulness'], "Faithfulness")
-            st.plotly_chart(fig1, use_container_width=True)
-            st.caption("💡 Measures if the answer is based solely on retrieved sources without hallucination")
+    with col1:
+        fig1 = create_metrics_gauge(metrics.get('avg_faithfulness', 0), "Faithfulness")
+        st.plotly_chart(fig1, use_container_width=True)
+        st.caption("💡 Answers grounded in sources without hallucination")
 
-        with col2:
-            fig2 = create_metrics_gauge(m['relevance'], "Relevance")
-            st.plotly_chart(fig2, use_container_width=True)
-            st.caption("💡 Measures if the answer directly addresses the user's question")
+    with col2:
+        fig2 = create_metrics_gauge(metrics.get('avg_relevance', 0), "Relevance")
+        st.plotly_chart(fig2, use_container_width=True)
+        st.caption("💡 Answers directly address questions")
 
-        with col3:
-            fig3 = create_metrics_gauge(m['precision'], "Context Precision")
-            st.plotly_chart(fig3, use_container_width=True)
-            st.caption("💡 Measures if the retrieved sources are relevant to the question")
+    with col3:
+        fig3 = create_metrics_gauge(metrics.get('avg_context_precision', 0), "Context Precision")
+        st.plotly_chart(fig3, use_container_width=True)
+        st.caption("💡 Retrieved sources are relevant")
 
-        with col4:
-            overall = (m['faithfulness'] + m['relevance'] + m['precision']) / 3
-            fig4 = create_metrics_gauge(overall, "Overall Quality")
-            st.plotly_chart(fig4, use_container_width=True)
-            st.caption("💡 Average of all quality metrics")
+    with col4:
+        overall = (
+            metrics.get('avg_faithfulness', 0) +
+            metrics.get('avg_relevance', 0) +
+            metrics.get('avg_context_precision', 0)
+        ) / 3
+        fig4 = create_metrics_gauge(overall, "Overall Quality")
+        st.plotly_chart(fig4, use_container_width=True)
+        st.caption("💡 Average of all metrics")
 
+    st.divider()
+
+    # Technical performance
+    st.markdown("### ⚡ Technical Performance")
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.metric("Avg Latency", f"{metrics.get('avg_latency', 0):.2f}s")
+        st.caption(f"Range: {metrics.get('min_latency', 0):.2f}s - {metrics.get('max_latency', 0):.2f}s")
+
+    with col2:
+        st.metric("Total Queries", metrics.get('total_queries', 0))
+        st.caption("Test set size")
+
+    with col3:
+        st.metric("Evaluation Date", metrics.get('evaluation_date', 'N/A')[:10])
+        st.caption("Last system evaluation")
+
+    # Per-topic breakdown
+    if 'per_topic' in metrics and metrics['per_topic']:
         st.divider()
+        st.markdown("### 🎯 Per-Topic Performance")
 
-        st.info("💡 **Tip:** These metrics evaluate the quality of your most recent query. Return to the Query tab to ask another question.")
+        topic_data = metrics['per_topic']
+        topics = list(topic_data.keys())
+        qualities = [topic_data[t]['avg_quality'] * 100 for t in topics]
 
-    else:
-        # Show baseline metrics from evaluation file
-        st.markdown("## 📊 System Performance Baseline")
-        st.info("These metrics are from the initial system evaluation on 8 test queries. Click **'Evaluate Response Quality'** in the Query tab to see metrics for your current query.")
+        fig = go.Figure(data=[
+            go.Bar(
+                x=[t.capitalize() for t in topics],
+                y=qualities,
+                marker_color=['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728'][:len(topics)]
+            )
+        ])
 
-        metrics = load_evaluation_metrics()
+        fig.update_layout(
+            title="Quality by Cancer Type",
+            yaxis_title="Quality Score (%)",
+            yaxis_range=[0, 100],
+            height=300,
+            margin=dict(l=10, r=10, t=40, b=10)
+        )
 
-        if not metrics:
-            st.warning("⚠️ No evaluation metrics found. Run: `python -m src.evaluation`")
-            return
-
-        # Main metrics
-        col1, col2, col3, col4 = st.columns(4)
-
-        with col1:
-            fig1 = create_metrics_gauge(metrics.get('avg_faithfulness', 0), "Faithfulness")
-            st.plotly_chart(fig1, use_container_width=True)
-            st.caption("💡 Measures if answers are based solely on sources without hallucination")
-
-        with col2:
-            fig2 = create_metrics_gauge(metrics.get('avg_relevance', 0), "Relevance")
-            st.plotly_chart(fig2, use_container_width=True)
-            st.caption("💡 Measures if answers directly address the questions")
-
-        with col3:
-            fig3 = create_metrics_gauge(metrics.get('avg_context_precision', 0), "Context Precision")
-            st.plotly_chart(fig3, use_container_width=True)
-            st.caption("💡 Measures if retrieved sources are relevant to questions")
-
-        with col4:
-            overall = (
-                metrics.get('avg_faithfulness', 0) +
-                metrics.get('avg_relevance', 0) +
-                metrics.get('avg_context_precision', 0)
-            ) / 3
-            fig4 = create_metrics_gauge(overall, "Overall Quality")
-            st.plotly_chart(fig4, use_container_width=True)
-            st.caption("💡 Average of all quality metrics")
+        st.plotly_chart(fig, use_container_width=True)
 
 
 def main():
@@ -469,7 +478,8 @@ def main():
     top_k, model, show_context = display_sidebar()
 
     # Tabs
-    tab1, tab2, tab3 = st.tabs(["💬 Query", "📊 Metrics", "ℹ️ About"])
+    tab1, tab2, tab3 = st.tabs(["💬 Query", "📊 System Performance", "ℹ️ About"])
+
 
     # Tab 1: Query Interface
     with tab1:
@@ -695,8 +705,8 @@ def main():
             st.markdown(formatted_answer, unsafe_allow_html=True)
 
 
-            # Quality evaluation button (now works with session state!)
              # Quality evaluation button - evaluates and switches to Metrics tab
+            # Quality evaluation button - displays inline
             if st.button("🔬 Evaluate Response Quality"):
                 with st.spinner("🔬 Evaluating response quality..."):
                     metrics = evaluate_response_quality(
@@ -706,9 +716,37 @@ def main():
                         resp['sources']
                     )
                     st.session_state.quality_metrics = metrics
-                    st.session_state.show_query_metrics = True
-                    # Note: We'll switch to tab programmatically
-                    st.info("✅ Evaluation complete! Switch to the **Metrics** tab to view results.")
+
+            # Display inline quality metrics if available
+            if st.session_state.quality_metrics:
+                st.markdown("#### 📊 Quality Metrics for This Response")
+                m = st.session_state.quality_metrics
+
+                col1, col2, col3 = st.columns(3)
+
+                with col1:
+                    fig1 = create_metrics_gauge(m['faithfulness'], "Faithfulness")
+                    st.plotly_chart(fig1, use_container_width=True, config={'displayModeBar': False})
+                    st.caption("Is answer grounded in sources?")
+
+                with col2:
+                    fig2 = create_metrics_gauge(m['relevance'], "Relevance")
+                    st.plotly_chart(fig2, use_container_width=True, config={'displayModeBar': False})
+                    st.caption("Does answer address question?")
+
+                with col3:
+                    fig3 = create_metrics_gauge(m['precision'], "Context Precision")
+                    st.plotly_chart(fig3, use_container_width=True, config={'displayModeBar': False})
+                    st.caption("Are sources relevant?")
+
+                overall = (m['faithfulness'] + m['relevance'] + m['precision']) / 3
+
+                if overall >= 0.9:
+                    st.success(f"✅ Excellent quality: {overall:.1%}")
+                elif overall >= 0.8:
+                    st.info(f"✅ Good quality: {overall:.1%}")
+                else:
+                    st.warning(f"⚠️ Quality score: {overall:.1%}")
 
             st.divider()
 
